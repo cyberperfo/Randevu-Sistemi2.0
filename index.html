@@ -6,6 +6,30 @@
     <title>Randevu Sistemi</title>
     <link rel="icon" type="img/png" href="resimler/imu_logo.png">
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Listeyi güzelleştirmek için ek stil */
+        #randevuListesi {
+            list-style: none;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .randevu-kart {
+            background: #f9f9f9;
+            border-left: 5px solid aqua;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .zaman {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -14,11 +38,65 @@
         <a href="chat.html" id="ai"><img id="foto" src="resimler/indir.jpg" alt="Gemini" title="Gemini ornek kod"></a>
     </header>
 
-    <div>
-        <p>Randevu Al</p>
+    <div style="text-align: center; padding: 20px;">
+        <h2><i class="fas fa-calendar-alt"></i> Güncel Randevu Programı</h2>
+        <div id="randevuListesi">
+            <p>Veriler yükleniyor...</p>
+        </div>
     </div>
+
     <footer>
         <p>© 2025 Tüm hakları saklıdır</p>
     </footer>
+
+    <script>
+        // Dakikayı (C'den gelen) SS:DD formatına çevirir
+        function formatZaman(dakika) {
+            let s = Math.floor(dakika / 60);
+            let d = dakika % 60;
+            return `${s.toString().padStart(2, '0')}:${d.toString().padStart(2, '0')}`;
+        }
+
+        // C backend tarafından üretilen data.json dosyasını okur
+        async function verileriGetir() {
+            try {
+                // Live Server sayesinde bu dosya anlık okunur
+                const response = await fetch('data.json');
+                if (!response.ok) throw new Error();
+                
+                const veriler = await response.json();
+                const listeDiv = document.getElementById('randevuListesi');
+                
+                if (veriler.length === 0) {
+                    listeDiv.innerHTML = "<p>Henüz kayıtlı randevu yok.</p>";
+                    return;
+                }
+
+                // Arayüzü güncelle
+                listeDiv.innerHTML = '';
+                veriler.forEach(r => {
+                    listeDiv.innerHTML += `
+                        <div class="randevu-kart">
+                            <div>
+                                <strong>#${r.id} - ${r.isim}</strong>
+                            </div>
+                            <div class="zaman">
+                                ${formatZaman(r.baslangic)} - ${formatZaman(r.bitis)}
+                            </div>
+                        </div>`;
+                });
+                console.log("Veriler backend'den güncellendi.");
+
+            } catch (err) {
+                console.log("JSON dosyası henüz oluşmadı veya okunamıyor.");
+            }
+        }
+
+        // Sayfa açıldığında çalıştır
+        window.onload = verileriGetir;
+
+        // Her 5 saniyede bir C'den yeni veri gelmiş mi diye kontrol et
+        setInterval(verileriGetir, 5000);
+    </script>
 </body>
 </html>

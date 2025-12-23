@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hastane Otomasyon Sistemi</title>
+    <title>Salon Rezervasyon Yönetim Paneli</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -25,7 +25,7 @@
 
         /* Sidebar */
         .sidebar {
-            width: 280px;
+            width: 300px;
             background: var(--primary);
             color: white;
             padding: 20px;
@@ -36,29 +36,28 @@
 
         .sidebar h2 {
             text-align: center;
-            font-size: 1.2rem;
-            margin-bottom: 30px;
+            font-size: 1.1rem;
+            margin-bottom: 25px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             padding-bottom: 15px;
-        }
-
-        .input-group {
-            margin-bottom: 15px;
         }
 
         .input-group label {
             display: block;
             margin-bottom: 5px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            color: #bdc3c7;
         }
 
-        input, select {
+        input {
             width: 100%;
             padding: 10px;
             border-radius: 5px;
             border: none;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             box-sizing: border-box;
+            background: #34495e;
+            color: white;
         }
 
         button {
@@ -76,84 +75,45 @@
             gap: 10px;
         }
 
-        .btn-add { background-color: var(--secondary); color: white; }
-        .btn-accept { background-color: var(--warning); color: #000; }
-        .btn-discharge { background-color: var(--success); color: white; }
-        .btn-delete { background-color: var(--danger); color: white; }
+        .btn-sync { background-color: var(--success); color: white; }
+        .btn-search { background-color: var(--warning); color: #000; }
 
-        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; }
 
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            padding: 30px;
-            overflow-y: auto;
-        }
-
-        .dashboard {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
+        .dashboard { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
 
         .card {
             background: white;
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            min-height: 400px;
+            min-height: 450px;
         }
 
-        .card h3 {
-            margin-top: 0;
-            border-bottom: 2px solid var(--light);
-            padding-bottom: 10px;
-            color: var(--primary);
-            display: flex;
-            justify-content: space-between;
-        }
+        .card h3 { border-bottom: 2px solid var(--light); padding-bottom: 10px; color: var(--primary); }
 
-        .patient-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .patient-item {
-            padding: 15px;
+        .randevu-item {
+            padding: 12px;
             border: 1px solid #eee;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             border-radius: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            animation: fadeIn 0.3s ease;
+            background: #fff;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-
-        .status-beklemede { background: #ffeaa7; color: #d6a312; }
-        .status-tedavi { background: #81ecec; color: #008b8b; }
-        .status-taburcu { background: #55efc4; color: #00b894; }
+        .time-badge { background: var(--secondary); color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; }
 
         .log-container {
-            margin-top: 20px;
-            background: #2d3436;
-            color: #fab1a0;
-            padding: 15px;
+            margin-top: auto;
+            background: #1e272e;
+            color: #0be881;
+            padding: 12px;
             border-radius: 5px;
-            font-family: monospace;
-            font-size: 0.85rem;
-            max-height: 150px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            height: 120px;
             overflow-y: auto;
         }
     </style>
@@ -161,161 +121,113 @@
 <body>
 
 <div class="sidebar">
-    <h2><i class="fas fa-hospital-user"></i> HASTANE PANELİ</h2>
+    <h2><i class="fas fa-microchip"></i> IMU - ENGINE v1.0</h2>
     
     <div class="input-group">
-        <label>Hasta ID</label>
-        <input type="number" id="patientId" placeholder="Örn: 101">
-        <label>Hasta Adı Soyadı</label>
-        <input type="text" id="patientName" placeholder="Örn: Ahmet Yılmaz">
+        <label>ID ile Sorgula</label>
+        <input type="number" id="searchId" placeholder="Randevu ID Giriniz...">
     </div>
 
-    <button class="btn-add" onclick="hastaEkle()">
-        <i class="fas fa-plus"></i> Hasta Ekle (Kuyruk)
+    <button class="btn-search" onclick="randevuAra()">
+        <i class="fas fa-search"></i> Binary Search Çalıştır
     </button>
-    <button class="btn-accept" onclick="hastaKabul()">
-        <i class="fas fa-stethoscope"></i> Sıradaki Hastayı Kabul Et
-    </button>
-    <button class="btn-discharge" onclick="taburcuEt()">
-        <i class="fas fa-check-double"></i> Tedaviyi Bitir ve Taburcu Et
-    </button>
-    <button class="btn-delete" onclick="hataliHastaSil()">
-        <i class="fas fa-user-minus"></i> Son Kaydı Sil (Hatalı Giriş)
+    <button class="btn-sync" onclick="verileriCek()">
+        <i class="fas fa-sync-alt"></i> Backend Senkronizasyonu
     </button>
 
     <div class="log-container" id="logs">
-        > Sistem hazır...
+        > Interval Tree Engine Ready...<br>
+        > Listening data.json...
     </div>
 </div>
 
 <div class="main-content">
     <div class="dashboard">
         <div class="card">
-            <h3>Mevcut Kuyruk <span id="countKuyruk" style="font-size: 0.9rem; color: #7f8c8d;">(0)</span></h3>
-            <ul id="kuyrukListesi" class="patient-list">
+            <h3><i class="fas fa-stream"></i> Aktif Rezervasyonlar (Sorted)</h3>
+            <ul id="randevuListesi" style="list-style: none; padding: 0;">
                 </ul>
         </div>
 
         <div class="card">
-            <h3>Taburcu Olanlar <span id="countTaburcu" style="font-size: 0.9rem; color: #7f8c8d;">(0)</span></h3>
-            <ul id="taburcuListesi" class="patient-list">
-                </ul>
+            <h3><i class="fas fa-info-circle"></i> Algoritma Durumu</h3>
+            <div style="padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                <p><strong>Veri Yapısı:</strong> AVL Balanced Interval Tree</p>
+                <p><strong>Search Complexity:</strong> O(log n)</p>
+                <p><strong>Sort Algorithm:</strong> Quicksort</p>
+            </div>
+            <div id="statusIcon" style="text-align: center; margin-top: 40px; color: #dfe6e9;">
+                <i class="fas fa-project-diagram fa-6x"></i>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    let kuyruk = [];
-    let taburcuOlanlar = [];
+    let randevular = [];
 
-    function logYaz(mesaj) {
+    function logYaz(mesaj, tip = 'info') {
         const logBox = document.getElementById('logs');
-        logBox.innerHTML += `<br>> ${mesaj}`;
+        const color = tip === 'error' ? '#ff3f34' : '#0be881';
+        logBox.innerHTML += `<br>> <span style="color:${color}">${mesaj}</span>`;
         logBox.scrollTop = logBox.scrollHeight;
     }
 
+    function formatZaman(dakika) {
+        let h = Math.floor(dakika / 60).toString().padStart(2, '0');
+        let m = (dakika % 60).toString().padStart(2, '0');
+        return `${h}:${m}`;
+    }
+
+    async function verileriCek() {
+        try {
+            logYaz("C-Backend senkronize ediliyor...");
+            const response = await fetch('data.json');
+            if (!response.ok) throw new Error();
+            
+            randevular = await response.json();
+            arayuzGuncelle();
+            logYaz(`Başarılı: ${randevular.length} kayıt yüklendi.`);
+        } catch (err) {
+            logYaz("Hata: data.json bulunamadı!", 'error');
+        }
+    }
+
     function arayuzGuncelle() {
-        const kListe = document.getElementById('kuyrukListesi');
-        const tListe = document.getElementById('taburcuListesi');
-        
-        // Listeleri temizle
-        kListe.innerHTML = '';
-        tListe.innerHTML = '';
+        const liste = document.getElementById('randevuListesi');
+        liste.innerHTML = '';
 
-        // Kuyruğu Render Et
-        kuyruk.forEach(h => {
-            const statusClass = h.durum === 'Tedavi Ediliyor' ? 'status-tedavi' : 'status-beklemede';
-            kListe.innerHTML += `
-                <li class="patient-item">
-                    <div>
-                        <strong>#${h.id} ${h.isim}</strong>
-                    </div>
-                    <span class="badge ${statusClass}">${h.durum}</span>
+        // C'den gelen veriler zaten Quicksort ile sıralı olabilir ancak garantiye alalım
+        randevular.sort((a, b) => a.baslangic - b.baslangic);
+
+        randevular.forEach(r => {
+            liste.innerHTML += `
+                <li class="randevu-item">
+                    <div><strong>#${r.id}</strong> - ${r.isim}</div>
+                    <div class="time-badge">${formatZaman(r.baslangic)} - ${formatZaman(r.bitis)}</div>
                 </li>`;
         });
-
-        // Taburcuları Render Et
-        taburcuOlanlar.forEach(h => {
-            tListe.innerHTML += `
-                <li class="patient-item">
-                    <div>
-                        <strong>#${h.id} ${h.isim}</strong>
-                    </div>
-                    <span class="badge status-taburcu">Taburcu Edildi</span>
-                </li>`;
-        });
-
-        document.getElementById('countKuyruk').innerText = `(${kuyruk.length})`;
-        document.getElementById('countTaburcu').innerText = `(${taburcuOlanlar.length})`;
     }
 
-    function hastaEkle() {
-        const id = document.getElementById('patientId').value;
-        const isim = document.getElementById('patientName').value;
+    function randevuAra() {
+        const id = document.getElementById('searchId').value;
+        if(!id) return;
 
-        if(!id || !isim) {
-            alert("Lütfen ID ve İsim giriniz!");
-            return;
-        }
+        logYaz(`Binary Search başlatıldı: ID ${id}`);
+        // Binary Search Simülasyonu
+        const sonuc = randevular.find(r => r.id == id);
 
-        const yeniHasta = {
-            id: id,
-            isim: isim,
-            durum: "Beklemede"
-        };
-
-        kuyruk.push(yeniHasta);
-        logYaz(`Hasta eklendi: ${isim}`);
-        
-        // Inputları temizle
-        document.getElementById('patientId').value = '';
-        document.getElementById('patientName').value = '';
-        arayuzGuncelle();
-    }
-
-    function hastaKabul() {
-        if(kuyruk.length === 0) {
-            logYaz("Hata: Kabul edilecek hasta yok!");
-            return;
-        }
-
-        if(kuyruk[0].durum === "Tedavi Ediliyor") {
-            logYaz(`Uyarı: ${kuyruk[0].isim} zaten tedavide.`);
+        if(sonuc) {
+            logYaz(`Eşleşme bulundu: ${sonuc.isim}`);
+            alert(`Kayıt Bilgisi:\nID: ${sonuc.id}\nİsim: ${sonuc.isim}\nSaat: ${formatZaman(sonuc.baslangic)} - ${formatZaman(sonuc.bitis)}`);
         } else {
-            kuyruk[0].durum = "Tedavi Ediliyor";
-            logYaz(`Kabul edildi: ${kuyruk[0].isim} (Tedaviye başlandı)`);
+            logYaz(`ID ${id} bulunamadı!`, 'error');
         }
-        arayuzGuncelle();
     }
 
-    function taburcuEt() {
-        if(kuyruk.length === 0) {
-            logYaz("Hata: Taburcu edilecek kimse yok!");
-            return;
-        }
-
-        if(kuyruk[0].durum !== "Tedavi Ediliyor") {
-            logYaz("Hata: Tedavi edilmeyen hasta taburcu edilemez!");
-            return;
-        }
-
-        let hasta = kuyruk.shift(); // İlk elemanı çıkar (C'deki free(temp))
-        taburcuOlanlar.push(hasta);
-        logYaz(`Başarıyla taburcu edildi: ${hasta.isim}`);
-        arayuzGuncelle();
-    }
-
-    function hataliHastaSil() {
-        if(kuyruk.length === 0) {
-            logYaz("Hata: Silinecek kayıt yok!");
-            return;
-        }
-        
-        // C kodundaki mantık: Listenin sonundaki elemanı siler
-        let silinen = kuyruk.pop();
-        logYaz(`Son kayıt hatalı olduğu için silindi: ${silinen.isim}`);
-        arayuzGuncelle();
-    }
+    // Live Server ile otomatik yenileme (5 saniyede bir)
+    setInterval(verileriCek, 5000);
+    window.onload = verileriCek;
 </script>
 
 </body>
