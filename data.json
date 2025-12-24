@@ -1,4 +1,6 @@
 [
   {"id": 1, "isim": "Anan", "baslangic": 720, "bitis": 451},
-  {"id": 2, "isim": "samet", "baslangic": 750, "bitis": 810}
+  {"id": 2, "isim": "samet", "baslangic": 750, "bitis": 810},
+  {"id": 3, "isim": "ulaügîttensiker", "baslangic": 870, "bitis": 920},
+  {"id": 4, "isim": "baban", "baslangic": 930, "bitis": 1110}
 ]
