@@ -2,162 +2,54 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Salon Rezervasyon Yönetim Paneli</title>
+    <title>IMU - Engine Yönetim Paneli</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root {
-            --primary: #2c3e50;
-            --secondary: #3498db;
-            --success: #27ae60;
-            --danger: #e74c3c;
-            --warning: #f1c40f;
-            --light: #f4f7f6;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--light);
-            margin: 0;
-            display: flex;
-            height: 100vh;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: 300px;
-            background: var(--primary);
-            color: white;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-        }
-
-        .sidebar h2 {
-            text-align: center;
-            font-size: 1.1rem;
-            margin-bottom: 25px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 15px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 0.85rem;
-            color: #bdc3c7;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            border: none;
-            margin-bottom: 12px;
-            box-sizing: border-box;
-            background: #34495e;
-            color: white;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .btn-sync { background-color: var(--success); color: white; }
-        .btn-search { background-color: var(--warning); color: #000; }
-
+        :root { --primary: #2c3e50; --secondary: #3498db; --success: #27ae60; --warning: #f1c40f; --light: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--light); margin: 0; display: flex; height: 100vh; }
+        .sidebar { width: 300px; background: var(--primary); color: white; padding: 20px; display: flex; flex-direction: column; }
+        .sidebar h2 { border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; font-size: 1.2rem; color: var(--secondary); }
         .main-content { flex: 1; padding: 30px; overflow-y: auto; }
-
         .dashboard { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
-
-        .card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            min-height: 450px;
-        }
-
-        .card h3 { border-bottom: 2px solid var(--light); padding-bottom: 10px; color: var(--primary); }
-
-        .randevu-item {
-            padding: 12px;
-            border: 1px solid #eee;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #fff;
-        }
-
-        .time-badge { background: var(--secondary); color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; }
-
-        .log-container {
-            margin-top: auto;
-            background: #1e272e;
-            color: #0be881;
-            padding: 12px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.75rem;
-            height: 120px;
-            overflow-y: auto;
-        }
+        .card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        input { width: 100%; padding: 10px; border-radius: 5px; border: none; margin-bottom: 12px; background: #34495e; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 10px; transition: 0.3s; }
+        .btn-search { background: var(--warning); color: #2c3e50; }
+        .btn-sync { background: var(--success); color: white; }
+        .log-container { background: #1e272e; color: #0be881; padding: 12px; border-radius: 5px; font-family: monospace; font-size: 0.8rem; height: 150px; overflow-y: auto; margin-top: auto; }
+        .randevu-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; font-size: 0.9rem; }
+        .status-box { background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 0.85rem; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <h2><i class="fas fa-microchip"></i> IMU - ENGINE v1.0</h2>
-    
-    <div class="input-group">
-        <label>ID ile Sorgula</label>
-        <input type="number" id="searchId" placeholder="Randevu ID Giriniz...">
+    <h2><i class="fas fa-cogs"></i> IMU ENGINE v5.0</h2>
+    <div style="margin-top: 20px;">
+        <label style="font-size: 0.8rem; color: #bdc3c7;">ID ile Sorgula (Binary Search)</label>
+        <input type="number" id="searchId" placeholder="ID Giriniz...">
+        <button class="btn-search" onclick="randevuAra()"><i class="fas fa-search"></i> Algoritmayı Çalıştır</button>
+        <button class="btn-sync" onclick="verileriCek()"><i class="fas fa-sync-alt"></i> Backend Senkronize Et</button>
     </div>
-
-    <button class="btn-search" onclick="randevuAra()">
-        <i class="fas fa-search"></i> Binary Search Çalıştır
-    </button>
-    <button class="btn-sync" onclick="verileriCek()">
-        <i class="fas fa-sync-alt"></i> Backend Senkronizasyonu
-    </button>
-
-    <div class="log-container" id="logs">
-        > Interval Tree Engine Ready...<br>
-        > Listening data.json...
-    </div>
+    <div class="log-container" id="logs">> Engine Ready...</div>
 </div>
 
 <div class="main-content">
     <div class="dashboard">
         <div class="card">
-            <h3><i class="fas fa-stream"></i> Aktif Rezervasyonlar (Sorted)</h3>
-            <ul id="randevuListesi" style="list-style: none; padding: 0;">
-                </ul>
+            <h3><i class="fas fa-database"></i> Bellekteki Veriler (Sorted)</h3>
+            <div id="randevuListesi"></div>
         </div>
-
         <div class="card">
-            <h3><i class="fas fa-info-circle"></i> Algoritma Durumu</h3>
-            <div style="padding: 15px; background: #f8f9fa; border-radius: 8px;">
+            <h3><i class="fas fa-project-diagram"></i> Sistem Durumu</h3>
+            <div class="status-box">
                 <p><strong>Veri Yapısı:</strong> AVL Balanced Interval Tree</p>
-                <p><strong>Search Complexity:</strong> O(log n)</p>
-                <p><strong>Sort Algorithm:</strong> Quicksort</p>
+                <p><strong>Arama Hızı:</strong> O(log n)</p>
+                <p><strong>Sıralama:</strong> Quicksort (ID bazlı)</p>
             </div>
-            <div id="statusIcon" style="text-align: center; margin-top: 40px; color: #dfe6e9;">
-                <i class="fas fa-project-diagram fa-6x"></i>
+            <div style="text-align: center; margin-top: 50px; color: #dfe6e9;">
+                <i class="fas fa-microchip fa-5x"></i>
+                <p style="color: #bdc3c7;">Backend Bağlantısı Aktif</p>
             </div>
         </div>
     </div>
@@ -166,11 +58,11 @@
 <script>
     let randevular = [];
 
-    function logYaz(mesaj, tip = 'info') {
-        const logBox = document.getElementById('logs');
-        const color = tip === 'error' ? '#ff3f34' : '#0be881';
-        logBox.innerHTML += `<br>> <span style="color:${color}">${mesaj}</span>`;
-        logBox.scrollTop = logBox.scrollHeight;
+    function logYaz(msg, error = false) {
+        const logs = document.getElementById('logs');
+        const color = error ? '#ff3f34' : '#0be881';
+        logs.innerHTML += `<br>> <span style="color:${color}">${msg}</span>`;
+        logs.scrollTop = logs.scrollHeight;
     }
 
     function formatZaman(dakika) {
@@ -181,54 +73,47 @@
 
     async function verileriCek() {
         try {
-            logYaz("C-Backend senkronize ediliyor...");
-            const response = await fetch('data.json');
-            if (!response.ok) throw new Error();
-            
-            randevular = await response.json();
+            const res = await fetch('data.json?t=' + new Date().getTime());
+            randevular = await res.json();
             arayuzGuncelle();
-            logYaz(`Başarılı: ${randevular.length} kayıt yüklendi.`);
-        } catch (err) {
-            logYaz("Hata: data.json bulunamadı!", 'error');
-        }
+            logYaz(`${randevular.length} kayıt senkronize edildi.`);
+        } catch (e) { logYaz("Hata: data.json okunamadı!", true); }
     }
 
     function arayuzGuncelle() {
         const liste = document.getElementById('randevuListesi');
         liste.innerHTML = '';
-
-        // C'den gelen veriler zaten Quicksort ile sıralı olabilir ancak garantiye alalım
-        randevular.sort((a, b) => a.baslangic - b.baslangic);
-
+        randevular.sort((a,b) => a.id - b.id); // ID'ye göre sırala
         randevular.forEach(r => {
-            liste.innerHTML += `
-                <li class="randevu-item">
-                    <div><strong>#${r.id}</strong> - ${r.isim}</div>
-                    <div class="time-badge">${formatZaman(r.baslangic)} - ${formatZaman(r.bitis)}</div>
-                </li>`;
+            liste.innerHTML += `<div class="randevu-item"><span>#${r.id} - ${r.isim}</span> <b>${formatZaman(r.baslangic)}</b></div>`;
         });
     }
 
     function randevuAra() {
         const id = document.getElementById('searchId').value;
         if(!id) return;
-
-        logYaz(`Binary Search başlatıldı: ID ${id}`);
-        // Binary Search Simülasyonu
-        const sonuc = randevular.find(r => r.id == id);
-
-        if(sonuc) {
-            logYaz(`Eşleşme bulundu: ${sonuc.isim}`);
-            alert(`Kayıt Bilgisi:\nID: ${sonuc.id}\nİsim: ${sonuc.isim}\nSaat: ${formatZaman(sonuc.baslangic)} - ${formatZaman(sonuc.bitis)}`);
+        logYaz(`Binary Search tetiklendi: ID ${id}`);
+        const s = randevular.find(r => r.id == id); // Binary Search simülasyonu
+        if(s) {
+            logYaz(`Bulundu: ${s.isim}`);
+            alert(`BULUNDU!\nİsim: ${s.isim}\nSaat: ${formatZaman(s.baslangic)} - ${formatZaman(s.bitis)}`);
         } else {
-            logYaz(`ID ${id} bulunamadı!`, 'error');
+            logYaz(`Hata: ID ${id} bulunamadı.`, true);
         }
     }
 
-    // Live Server ile otomatik yenileme (5 saniyede bir)
-    setInterval(verileriCek, 5000);
     window.onload = verileriCek;
+    async function verileriCek() {
+    try {
+        logYaz("Manuel senkronizasyon başlatıldı...");
+        const res = await fetch('data.json?t=' + new Date().getTime());
+        randevular = await res.json();
+        arayuzGuncelle();
+        logYaz(`${randevular.length} kayıt başarıyla çekildi.`, 'success');
+    } catch (e) { 
+        logYaz("Hata: Backend verisi henüz hazır değil!", true); 
+    }
+}
 </script>
-
 </body>
 </html>

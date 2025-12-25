@@ -1,8 +1,8 @@
 [
-  {"id": 1, "isim": "Anan", "baslangic": 720, "bitis": 451},
-  {"id": 5, "isim": "pembe furkan", "baslangic": 720, "bitis": 526},
-  {"id": 2, "isim": "samet", "baslangic": 750, "bitis": 810},
-  {"id": 3, "isim": "ulaügîttensiker", "baslangic": 870, "bitis": 920},
-  {"id": 4, "isim": "baban", "baslangic": 930, "bitis": 1110},
-  {"id": 6, "isim": ".40", "baslangic": 1120, "bitis": 1150}
+  {"id": 1, "isim": "sametxd", "baslangic": 570, "bitis": 620},
+  {"id": 2, "isim": "samet", "baslangic": 750, "bitis": 940},
+  {"id": 100, "isim": "yusuf", "baslangic": 940, "bitis": 1010},
+  {"id": 4, "isim": "Pembe Furkan toparlak", "baslangic": 1140, "bitis": 1200},
+  {"id": 12, "isim": "Muhammedcan Tengur", "baslangic": 1210, "bitis": 1250},
+  {"id": 13, "isim": "Dehüet Zurna", "baslangic": 1270, "bitis": 1335}
 ]

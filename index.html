@@ -3,100 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Randevu Sistemi</title>
-    <link rel="icon" type="img/png" href="resimler/imu_logo.png">
-    <link rel="stylesheet" href="style.css">
+    <title>IMU - Randevu Sistemi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Listeyi güzelleştirmek için ek stil */
-        #randevuListesi {
-            list-style: none;
-            padding: 20px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .randevu-kart {
-            background: #f9f9f9;
-            border-left: 5px solid aqua;
-            margin-bottom: 10px;
-            padding: 15px;
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding-bottom: 50px; }
+        header { background: #2c3e50; color: white; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
+        h2 { color: #2c3e50; text-align: center; }
+        
+        /* Güncelleme Butonu Stili */
+        .btn-update {
+            display: block;
+            margin: 0 auto 20px auto;
+            padding: 12px 25px;
+            background-color: #3498db;
+            color: white;
+            border: none;
             border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .zaman {
             font-weight: bold;
-            color: #2c3e50;
+            cursor: pointer;
+            transition: background 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
+        .btn-update:hover { background-color: #2980b9; }
+        .btn-update i { margin-right: 8px; }
+
+        .randevu-kart { 
+            background: white; border-left: 5px solid #3498db; margin-bottom: 15px; 
+            padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .zaman { font-weight: bold; color: #2c3e50; background: #ecf0f1; padding: 5px 12px; border-radius: 20px; }
+        .admin-link { position: fixed; bottom: 20px; right: 20px; background: #27ae60; color: white; padding: 15px; border-radius: 50%; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        footer { position: fixed; bottom: 0; width: 100%; background: #2c3e50; color: white; text-align: center; padding: 10px 0; font-size: 0.8rem; }
     </style>
 </head>
 <body>
     <header>
-        <p>Randevu Sistemi</p>
-        <p>Gemini örnek olmayan kod -></p>
-        <a href="chat.html" id="ai"><img id="foto" src="resimler/indir.jpg" alt="Gemini" title="Gemini ornek kod"></a>
+        <h1><i class="fas fa-university"></i> İstanbul Medeniyet Üniversitesi</h1>
+        <p>Akıllı Salon Rezervasyon Sistemi</p>
     </header>
 
-    <div style="text-align: center; padding: 20px;">
-        <h2><i class="fas fa-calendar-alt"></i> Güncel Randevu Programı</h2>
+    <div class="container">
+        <h2><i class="fas fa-calendar-check"></i> Günlük Salon Programı</h2>
+        
+        <button class="btn-update" onclick="verileriGetir()">
+            <i class="fas fa-sync-alt"></i> Listeyi Güncelle
+        </button>
+
         <div id="randevuListesi">
-            <p>Veriler yükleniyor...</p>
+            <p style="text-align:center;">Veriler yükleniyor...</p>
         </div>
     </div>
 
-    <footer>
-        <p>© 2025 Tüm hakları saklıdır</p>
-    </footer>
+    <a href="chat.html" class="admin-link" title="Yönetim Paneli">
+        <i class="fas fa-tools fa-lg"></i>
+    </a>
+
+    <footer><p>© 2025 IMU Veri Yapıları Projesi - Tüm Hakları Saklıdır</p></footer>
 
     <script>
-        // Dakikayı (C'den gelen) SS:DD formatına çevirir
+        // Dakikayı (C'den gelen int) SS:DD formatına çevirir
         function formatZaman(dakika) {
-            let s = Math.floor(dakika / 60);
-            let d = dakika % 60;
-            return `${s.toString().padStart(2, '0')}:${d.toString().padStart(2, '0')}`;
+            let s = Math.floor(dakika / 60).toString().padStart(2, '0');
+            let d = (dakika % 60).toString().padStart(2, '0');
+            return `${s}:${d}`;
         }
 
-        // C backend tarafından üretilen data.json dosyasını okur
         async function verileriGetir() {
             try {
-                // Live Server sayesinde bu dosya anlık okunur
+                console.log("Manuel senkronizasyon tetiklendi...");
+                
+                // Cache (önbellek) sorununu önlemek için timestamp ekliyoruz
                 const response = await fetch('data.json?t=' + new Date().getTime());
-                if (!response.ok) throw new Error();
+                if (!response.ok) throw new Error("Dosya bulunamadı");
                 
                 const veriler = await response.json();
                 const listeDiv = document.getElementById('randevuListesi');
-                
+                listeDiv.innerHTML = '';
+
                 if (veriler.length === 0) {
-                    listeDiv.innerHTML = "<p>Henüz kayıtlı randevu yok.</p>";
+                    listeDiv.innerHTML = "<p style='text-align:center;'>Henüz kayıtlı randevu yok.</p>";
                     return;
                 }
 
-                // Arayüzü güncelle
-                listeDiv.innerHTML = '';
+                // C tarafındaki Quicksort mantığına uygun olarak JavaScript'te de sıralıyoruz
+                veriler.sort((a, b) => a.baslangic - b.baslangic);
+
                 veriler.forEach(r => {
                     listeDiv.innerHTML += `
                         <div class="randevu-kart">
-                            <div>
-                                <strong>#${r.id} - ${r.isim}</strong>
-                            </div>
+                            <div><strong>#${r.id}</strong> - ${r.isim}</div>
                             <div class="zaman">
-                                ${formatZaman(r.baslangic)} - ${formatZaman(r.bitis)}
+                                <i class="far fa-clock"></i> ${formatZaman(r.baslangic)} - ${formatZaman(r.bitis)}
                             </div>
                         </div>`;
                 });
-                console.log("Veriler backend'den güncellendi.");
+                
+                console.log("Veriler başarıyla manuel olarak çekildi.");
 
-            } catch (err) {
-                console.log("JSON dosyası henüz oluşmadı veya okunamıyor.");
+            } catch (err) { 
+                console.log("Hata: Backend verisi (data.json) okunamıyor."); 
+                document.getElementById('randevuListesi').innerHTML = 
+                    "<p style='text-align:center; color:red;'>Veri çekilemedi. Lütfen backend'in çalıştığından emin olun.</p>";
             }
         }
 
-        // Sayfa açıldığında çalıştır
+        // Sayfa ilk açıldığında verileri bir kez otomatik getir
         window.onload = verileriGetir;
-
-        // Her 5 saniyede bir C'den yeni veri gelmiş mi diye kontrol et
-        setInterval(verileriGetir, 5000);
     </script>
 </body>
 </html>

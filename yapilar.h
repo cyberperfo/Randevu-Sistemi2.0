@@ -8,7 +8,6 @@
 #define MAX_SALON 5
 #define INF 99999
 
-// 1. Randevu Modeli
 typedef struct Randevu {
     int id;
     char isim[50];
@@ -16,7 +15,6 @@ typedef struct Randevu {
     int bitis;     
 } Randevu;
 
-// 2. AVL + Interval Tree (Dengeli Ağaç Şartı)
 typedef struct IntervalNode {
     Randevu *veri;
     int max_bitis; 
@@ -24,13 +22,11 @@ typedef struct IntervalNode {
     int yukseklik; 
 } IntervalNode;
 
-// 3. Stack (Undo/Geri Al Şartı)
 typedef struct StackNode {
     int id;
     struct StackNode *sonraki;
 } StackNode;
 
-// 4. Queue (Bekleme Listesi/Görev Kuyruğu Şartı)
 typedef struct KuyrukNode {
     Randevu veri;
     struct KuyrukNode *sonraki;
@@ -39,5 +35,23 @@ typedef struct KuyrukNode {
 typedef struct {
     KuyrukNode *bas, *son;
 } Kuyruk;
+
+// --- algoritmalar.c içerisindeki tüm fonksiyonların prototipleri ---
+IntervalNode* randevuEkle(IntervalNode* kok, Randevu r, int sessiz);
+IntervalNode* avlSil(IntervalNode* kok, int id);
+void enKisaYolBul(int grafik[MAX_SALON][MAX_SALON], int baslangic);
+void quicksort(Randevu dizi[], int d, int y);
+int ikiliArama(Randevu dizi[], int d, int y, int id);
+void seviyeGosterBFS(IntervalNode* kok);
+int diziyeAktar(IntervalNode *kok, Randevu dizi[], int index);
+void jsonDosyasiOlustur(IntervalNode *kok);
+void csvdenYukle(IntervalNode** kok);
+void csvKaydet(Randevu r);
+
+// Stack ve Queue Prototipleri
+void push(StackNode **ust, int id);
+int pop(StackNode **ust);
+void enqueue(Kuyruk *q, Randevu r);
+Randevu dequeue(Kuyruk *q);
 
 #endif
