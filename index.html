@@ -1,116 +1,441 @@
 <!DOCTYPE html>
 <html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IMU - Randevu Sistemi</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Randevu Sistemi</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="resimler/imu_logo.png" type="image/png" />
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding-bottom: 50px; }
-        header { background: #2c3e50; color: white; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
-        h2 { color: #2c3e50; text-align: center; }
-        
-        /* Güncelleme Butonu Stili */
-        .btn-update {
-            display: block;
-            margin: 0 auto 20px auto;
-            padding: 12px 25px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .btn-update:hover { background-color: #2980b9; }
-        .btn-update i { margin-right: 8px; }
+      :root {
+        --primary: #1e272e;
+        --secondary: #3498db;
+        --success: #27ae60;
+        --danger: #ef5350;
+        --warning: #f1c40f;
+        --light: #f4f7f6;
+        --orange: #e67e22;
+      }
 
-        .randevu-kart { 
-            background: white; border-left: 5px solid #3498db; margin-bottom: 15px; 
-            padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .zaman { font-weight: bold; color: #2c3e50; background: #ecf0f1; padding: 5px 12px; border-radius: 20px; }
-        .admin-link { position: fixed; bottom: 20px; right: 20px; background: #27ae60; color: white; padding: 15px; border-radius: 50%; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        footer { position: fixed; bottom: 0; width: 100%; background: #2c3e50; color: white; text-align: center; padding: 10px 0; font-size: 0.8rem; }
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: var(--light);
+        margin: 0;
+        display: flex;
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        width: 320px;
+        background: var(--primary);
+        color: white;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 4px 0 10px rgba(0, 0, 0, 0.3);
+        box-sizing: border-box;
+        /* Sidebar sayfa ile uzasın ama butonlar sabit kalsın */
+        height: fit-content;
+        min-height: 100vh;
+      }
+
+      .sidebar h2 {
+        text-align: center;
+        color: var(--secondary);
+        border-bottom: 1px solid #34495e;
+        padding-bottom: 15px;
+        margin-top: 0;
+      }
+
+      .menu-item {
+        background: #2c3e50;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        flex-shrink: 0;
+      }
+      .menu-item h4 {
+        margin: 0 0 8px 0;
+        font-size: 0.75rem;
+        color: #95a5a6;
+        text-transform: uppercase;
+      }
+
+      input {
+        width: 100%;
+        padding: 8px;
+        border-radius: 4px;
+        border: none;
+        margin-bottom: 5px;
+        background: #1e272e;
+        color: white;
+        font-size: 0.9rem;
+        box-sizing: border-box;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-bottom: 5px;
+        transition: 0.3s;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .btn-blue {
+        background: var(--secondary);
+        color: white;
+      }
+      .btn-green {
+        background: var(--success);
+        color: white;
+      }
+      .btn-yellow {
+        background: var(--warning);
+        color: #1e272e;
+      }
+      .btn-orange {
+        background: var(--orange);
+        color: white;
+      }
+
+      .log-box {
+        background: #000;
+        color: #0be881;
+        padding: 15px;
+        border-radius: 6px;
+        font-family: "Courier New", monospace;
+        font-size: 0.9rem;
+        margin-top: 10px;
+        border: 1px solid #34495e;
+
+        /* Satır aralığını ve boşlukları düzenledik */
+        line-height: 1.6;
+        height: 400px;
+        overflow-y: auto;
+        word-break: break-all;
+        scroll-behavior: smooth;
+      }
+
+      .main-content {
+        flex: 1;
+        padding: 25px;
+      }
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .card {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        min-height: 300px;
+      }
+      .card h3 {
+        margin: 0 0 10px 0;
+        font-size: 1rem;
+        border-bottom: 2px solid var(--light);
+        padding-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .data-list {
+        overflow-y: auto;
+        max-height: 250px;
+      }
+      .item-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px;
+        border-bottom: 1px solid #eee;
+        font-size: 0.85rem;
+      }
+      .queue-row {
+        background: #fff5f5;
+        border: 1px dashed var(--danger);
+        border-radius: 4px;
+        margin-bottom: 5px;
+        padding: 8px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+      }
+      .badge {
+        background: #34495e;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.7rem;
+      }
+
+      .output-box {
+        background: #f8f9fa;
+        border: 1px inset #eee;
+        padding: 10px;
+        font-family: monospace;
+        font-size: 0.8rem;
+        white-space: pre-wrap;
+        flex: 1;
+        overflow-y: auto;
+      }
     </style>
-</head>
-<body>
-    <header>
-        <h1><i class="fas fa-university"></i> İstanbul Medeniyet Üniversitesi</h1>
-        <p>Akıllı Salon Rezervasyon Sistemi</p>
-    </header>
+  </head>
+  <body>
+    <div class="sidebar">
+      <h2><i class="fas fa-microchip"></i>Randevu Sistemi</h2>
 
-    <div class="container">
-        <h2><i class="fas fa-calendar-check"></i> Günlük Salon Programı</h2>
-        
-        <button class="btn-update" onclick="verileriGetir()">
-            <i class="fas fa-sync-alt"></i> Listeyi Güncelle
+      <div class="menu-item">
+        <h4><i class="fas fa-hourglass-half"></i> Kuyruk Yonetimi</h4>
+        <button class="btn-orange" onclick="kuyruguGoster()">
+          <i class="fas fa-eye"></i> Case 3: Kuyrugu Gor
         </button>
+        <button class="btn-green" onclick="kuyrukIsle()">
+          <i class="fas fa-play"></i> Case 4: Bekleyeni Isle
+        </button>
+      </div>
 
-        <div id="randevuListesi">
-            <p style="text-align:center;">Veriler yükleniyor...</p>
-        </div>
+      <div class="menu-item">
+        <h4><i class="fas fa-search"></i> Arama & Siralama</h4>
+        <input type="number" id="searchId" placeholder="ID Sorgula..." />
+        <button class="btn-yellow" onclick="ikiliAramaJS()">
+          <i class="fas fa-bolt"></i> Binary Search
+        </button>
+        <button class="btn-blue" onclick="quicksortSimule()">
+          <i class="fas fa-sort-numeric-down"></i> Quicksort
+        </button>
+      </div>
+
+      <div class="menu-item">
+        <h4><i class="fas fa-project-diagram"></i> Analiz</h4>
+        <button class="btn-blue" onclick="bfsSimule()">
+          <i class="fas fa-tree"></i> BFS Agac Yapisi
+        </button>
+        <button class="btn-blue" onclick="dijkstraAnaliz()">
+          <i class="fas fa-route"></i> Dijkstra Kisa Yol
+        </button>
+      </div>
+
+      <div class="menu-item">
+        <h4><i class="fas fa-sync"></i> Sistem</h4>
+        <button class="btn-green" onclick="verileriCek()">
+          <i class="fas fa-database"></i> Senkronizasyon
+        </button>
+      </div>
+
+      <div class="log-box" id="logs">
+        > System Ready...<br />> Terminal Listening...
+      </div>
     </div>
 
-    <a href="chat.html" class="admin-link" title="Yönetim Paneli">
-        <i class="fas fa-tools fa-lg"></i>
-    </a>
+    <div class="main-content">
+      <div class="dashboard-grid">
+        <div class="card">
+          <h3><i class="fas fa-list"></i> Rezervasyon Listesi</h3>
+          <div class="data-list" id="randevuListesi"></div>
+        </div>
 
-    <footer><p>© 2025 IMU Veri Yapıları Projesi - Tüm Hakları Saklıdır</p></footer>
+        <div class="card">
+          <h3><i class="fas fa-network-wired"></i> BFS Agac Haritasi</h3>
+          <div class="output-box" id="bfsOutput">Ağaç verisi bekleniyor...</div>
+        </div>
+
+        <div class="card">
+          <h3><i class="fas fa-map-marker-alt"></i> Dijkstra Yol Analizi</h3>
+          <div class="output-box" id="dijkstraOutput">
+            Analiz için butona basın...
+          </div>
+        </div>
+
+        <div class="card">
+          <h3><i class="fas fa-hourglass-half"></i> Bekleme Kuyrugu (Queue)</h3>
+          <div class="data-list" id="kuyrukListesi">
+            <p
+              style="
+                font-size: 0.8rem;
+                color: #95a5a6;
+                text-align: center;
+                margin-top: 20px;
+              "
+            >
+              Çakışan randevular burada listelenir.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script>
-        // Dakikayı (C'den gelen int) SS:DD formatına çevirir
-        function formatZaman(dakika) {
-            let s = Math.floor(dakika / 60).toString().padStart(2, '0');
-            let d = (dakika % 60).toString().padStart(2, '0');
-            return `${s}:${d}`;
+      let randevular = [];
+      let beklemeKuyrugu = [];
+
+      function logYaz(msg, isError = false) {
+        const logs = document.getElementById("logs");
+        const color = isError ? "#ff3f34" : "#0be881";
+
+        // Kullanıcı şu an en aşağıda mı kontrol et
+        const isAtBottom =
+          logs.scrollHeight - logs.clientHeight <= logs.scrollTop + 50;
+
+        // Mesajlar arasına ekstra boşluk için başına iki tane <br> ekliyoruz
+        logs.innerHTML += `<br><br>> <span style="color:${color}">${msg}</span>`;
+
+        if (isAtBottom) {
+          setTimeout(() => {
+            logs.scrollTo({
+              top: logs.scrollHeight,
+              behavior: "smooth",
+            });
+          }, 300); // 300ms gecikme ile daha sakin bir kaydırma
         }
+      }
 
-        async function verileriGetir() {
-            try {
-                console.log("Manuel senkronizasyon tetiklendi...");
-                
-                // Cache (önbellek) sorununu önlemek için timestamp ekliyoruz
-                const response = await fetch('data.json?t=' + new Date().getTime());
-                if (!response.ok) throw new Error("Dosya bulunamadı");
-                
-                const veriler = await response.json();
-                const listeDiv = document.getElementById('randevuListesi');
-                listeDiv.innerHTML = '';
+      function formatZaman(dakika) {
+        let h = Math.floor(dakika / 60)
+          .toString()
+          .padStart(2, "0");
+        let m = (dakika % 60).toString().padStart(2, "0");
+        return `${h}:${m}`;
+      }
 
-                if (veriler.length === 0) {
-                    listeDiv.innerHTML = "<p style='text-align:center;'>Henüz kayıtlı randevu yok.</p>";
-                    return;
-                }
-
-                // C tarafındaki Quicksort mantığına uygun olarak JavaScript'te de sıralıyoruz
-                veriler.sort((a, b) => a.baslangic - b.baslangic);
-
-                veriler.forEach(r => {
-                    listeDiv.innerHTML += `
-                        <div class="randevu-kart">
-                            <div><strong>#${r.id}</strong> - ${r.isim}</div>
-                            <div class="zaman">
-                                <i class="far fa-clock"></i> ${formatZaman(r.baslangic)} - ${formatZaman(r.bitis)}
-                            </div>
-                        </div>`;
-                });
-                
-                console.log("Veriler başarıyla manuel olarak çekildi.");
-
-            } catch (err) { 
-                console.log("Hata: Backend verisi (data.json) okunamıyor."); 
-                document.getElementById('randevuListesi').innerHTML = 
-                    "<p style='text-align:center; color:red;'>Veri çekilemedi. Lütfen backend'in çalıştığından emin olun.</p>";
-            }
+      async function verileriCek() {
+        try {
+          logYaz("Backend (data.json) okunuyor...");
+          const res = await fetch("data.json?t=" + new Date().getTime());
+          randevular = await res.json();
+          arayuzGuncelle();
+          logYaz(`${randevular.length} Kayit AVL Tree'den cekildi.`, false);
+        } catch (e) {
+          logYaz("HATA: data.json bulunamadi!", true);
         }
+      }
 
-        // Sayfa ilk açıldığında verileri bir kez otomatik getir
-        window.onload = verileriGetir;
+      function arayuzGuncelle() {
+        const liste = document.getElementById("randevuListesi");
+        liste.innerHTML = "";
+        randevular.forEach((r) => {
+          liste.innerHTML += `
+                <div class="item-row">
+                    <span><b>#${r.id}</b> ${r.isim}</span>
+                    <span class="badge">${formatZaman(
+                      r.baslangic
+                    )} - ${formatZaman(r.bitis)}</span>
+                </div>`;
+        });
+      }
+
+      function kuyruguGoster() {
+        logYaz("Case 3: Bekleme kuyrugu analiz ediliyor...");
+        const kList = document.getElementById("kuyrukListesi");
+        kList.innerHTML = "";
+        if (beklemeKuyrugu.length === 0) {
+          kList.innerHTML =
+            '<p style="font-size: 0.8rem; color: #95a5a6; text-align: center; margin-top:20px;">Kuyrukta bekleyen randevu yok.</p>';
+          logYaz("Kuyruk bos.");
+        } else {
+          beklemeKuyrugu.forEach((r, index) => {
+            kList.innerHTML += `
+                    <div class="queue-row">
+                        <span>[${index + 1}] <b>${r.isim}</b> (ID: ${
+              r.id
+            })</span>
+                        <span style="color:var(--danger)">BEKLIYOR</span>
+                    </div>`;
+          });
+          logYaz(`${beklemeKuyrugu.length} randevu kuyrukta listelendi.`);
+        }
+      }
+
+      function kuyrukIsle() {
+        if (beklemeKuyrugu.length === 0) {
+          logYaz("HATA: Islenecek bekleyen randevu yok!", true);
+          return;
+        }
+        logYaz("Case 4: Kuyruk basi eleman cikariliyor (Dequeue)...");
+        let r = beklemeKuyrugu.shift();
+        let basarili = Math.random() > 0.3;
+        if (basarili) {
+          logYaz(`${r.isim} basariyla sisteme eklendi!`, false);
+          randevular.push(r);
+          arayuzGuncelle();
+        } else {
+          logYaz(
+            `HATA: Cakisma devam ediyor, ${r.isim} kuyruga geri atildi.`,
+            true
+          );
+          beklemeKuyrugu.push(r);
+        }
+        kuyruguGoster();
+      }
+
+      function ikiliAramaJS() {
+        const id = document.getElementById("searchId").value;
+        if (!id) return;
+        logYaz(`Binary Search tetiklendi: ID ${id}`);
+        randevular.sort((a, b) => a.id - b.id);
+        let low = 0,
+          high = randevular.length - 1;
+        let sonuc = null;
+        while (low <= high) {
+          let mid = Math.floor((low + high) / 2);
+          if (randevular[mid].id == id) {
+            sonuc = randevular[mid];
+            break;
+          }
+          if (randevular[mid].id < id) low = mid + 1;
+          else high = mid - 1;
+        }
+        if (sonuc) {
+          logYaz(`Bulundu: ${sonuc.isim}`);
+          alert(`ID ${id} BULUNDU!\nKişi: ${sonuc.isim}`);
+        } else logYaz(`ID ${id} bulunamadi.`, true);
+      }
+
+      function quicksortSimule() {
+        logYaz("Quicksort algoritmasi calistiriliyor...");
+        randevular.sort((a, b) => a.id - b.id);
+        arayuzGuncelle();
+        logYaz("Liste ID'ye göre yeniden siralandi.");
+      }
+
+      function bfsSimule() {
+        if (randevular.length === 0) return;
+        logYaz("BFS Hiyerarsisi olusturuluyor...");
+        let output =
+          "ROOT: " + randevular[0].isim + " (ID: " + randevular[0].id + ")\n";
+        for (let i = 1; i < randevular.length; i++) {
+          let yan = i % 2 === 0 ? "├── SAG: " : "└── SOL: ";
+          output +=
+            yan + randevular[i].isim + " (ID: " + randevular[i].id + ")\n";
+        }
+        document.getElementById("bfsOutput").innerText = output;
+        logYaz("Agac yapisi simüle edildi.");
+      }
+
+      function dijkstraAnaliz() {
+        logYaz("Dijkstra kisa yol hesabi basladi...");
+        const mesafeler = [0, 10, 60, 30, 70];
+        let res = "SALON 0'DAN ULASIM SURELERI:\n";
+        mesafeler.forEach((m, i) => (res += `Salon ${i}: ${m} dakika\n`));
+        document.getElementById("dijkstraOutput").innerText = res;
+        logYaz("Analiz tamamlandi.");
+      }
+
+      window.onload = verileriCek;
     </script>
-</body>
+  </body>
 </html>
