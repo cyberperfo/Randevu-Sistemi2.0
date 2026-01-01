@@ -37,7 +37,6 @@
         flex-direction: column;
         box-shadow: 4px 0 10px rgba(0, 0, 0, 0.3);
         box-sizing: border-box;
-        /* Sidebar sayfa ile uzasın ama butonlar sabit kalsın */
         height: fit-content;
         min-height: 100vh;
       }
@@ -64,7 +63,8 @@
         text-transform: uppercase;
       }
 
-      input {
+      input,
+      select {
         width: 100%;
         padding: 8px;
         border-radius: 4px;
@@ -108,27 +108,35 @@
         color: white;
       }
 
+      /* LOG PANELİ SAĞA SABİTLENDİ */
+      .log-container {
+        position: fixed;
+        right: 20px;
+        top: 20px;
+        width: 300px;
+        z-index: 999;
+      }
+
       .log-box {
         background: #000;
         color: #0be881;
         padding: 15px;
         border-radius: 6px;
         font-family: "Courier New", monospace;
-        font-size: 0.9rem;
-        margin-top: 10px;
+        font-size: 0.85rem;
         border: 1px solid #34495e;
-
-        /* Satır aralığını ve boşlukları düzenledik */
         line-height: 1.6;
-        height: 400px;
+        height: 350px;
         overflow-y: auto;
         word-break: break-all;
         scroll-behavior: smooth;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       }
 
       .main-content {
         flex: 1;
         padding: 25px;
+        margin-right: 330px;
       }
       .dashboard-grid {
         display: grid;
@@ -200,12 +208,90 @@
       <h2><i class="fas fa-microchip"></i>Randevu Sistemi</h2>
 
       <div class="menu-item">
+        <h4><i class="fas fa-plus-circle"></i> Yeni Kayit Islemi</h4>
+
+        <div
+          id="hataMesaji"
+          style="
+            color: #ef5350;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            display: none;
+          "
+        >
+          <i class="fas fa-exclamation-circle"></i> <span id="hataText"></span>
+        </div>
+
+        <input
+          type="number"
+          id="idInput"
+          placeholder="ID Giriniz..."
+          min="1"
+          onkeypress="enterTusu(event)"
+        />
+        <input
+          type="text"
+          id="isimInput"
+          placeholder="Müşteri İsmi..."
+          onkeypress="enterTusu(event)"
+        />
+        <input
+          type="date"
+          id="tarihInput"
+          title="Randevu Tarihi"
+          onkeypress="enterTusu(event)"
+          min="2024-01-01"
+        />
+        <div style="display: flex; gap: 5px; margin-bottom: 5px">
+          <input
+            type="time"
+            id="basInput"
+            title="Başlangıç Saati"
+            onkeypress="enterTusu(event)"
+            style="flex: 1"
+          />
+          <input
+            type="time"
+            id="bitInput"
+            title="Bitiş Saati"
+            onkeypress="enterTusu(event)"
+            style="flex: 1"
+          />
+        </div>
+
+        <div
+          style="
+            font-size: 0.7rem;
+            color: #95a5a6;
+            margin-bottom: 8px;
+            text-align: center;
+          "
+        >
+          <i class="fas fa-info-circle"></i> En az 15 dakika, başlangıç < bitiş
+          olmalı
+        </div>
+
+        <button class="btn-green" onclick="ekleNodeJS()">
+          <i class="fas fa-paper-plane"></i> Randevu Ekle
+        </button>
+        <button class="btn-orange" onclick="undoNodeJS()">
+          <i class="fas fa-undo"></i> Geri Al
+        </button>
+        <button
+          class="btn-blue"
+          onclick="formTemizle()"
+          style="margin-top: 5px"
+        >
+          <i class="fas fa-broom"></i> Formu Temizle
+        </button>
+      </div>
+      <div class="menu-item">
         <h4><i class="fas fa-hourglass-half"></i> Kuyruk Yonetimi</h4>
         <button class="btn-orange" onclick="kuyruguGoster()">
-          <i class="fas fa-eye"></i> Case 3: Kuyrugu Gor
+          <i class="fas fa-eye"></i> Kuyrugu Gor
         </button>
         <button class="btn-green" onclick="kuyrukIsle()">
-          <i class="fas fa-play"></i> Case 4: Bekleyeni Isle
+          <i class="fas fa-play"></i> Kuyrugu Isle
         </button>
       </div>
 
@@ -236,9 +322,21 @@
           <i class="fas fa-database"></i> Senkronizasyon
         </button>
       </div>
+    </div>
 
+    <div class="log-container">
+      <div
+        style="
+          color: var(--primary);
+          font-weight: bold;
+          margin-bottom: 5px;
+          font-size: 14px;
+        "
+      >
+        <i class="fas fa-terminal"></i> Log Paneli
+      </div>
       <div class="log-box" id="logs">
-        > System Ready...<br />> Terminal Listening...
+        > Sistem Hazir...<br />> Terminal Listeleniyor...
       </div>
     </div>
 
@@ -283,25 +381,14 @@
       let randevular = [];
       let beklemeKuyrugu = [];
 
+      // OTOMATİK SCROLL VE RENKLİ LOGLAR
       function logYaz(msg, isError = false) {
         const logs = document.getElementById("logs");
         const color = isError ? "#ff3f34" : "#0be881";
-
-        // Kullanıcı şu an en aşağıda mı kontrol et
-        const isAtBottom =
-          logs.scrollHeight - logs.clientHeight <= logs.scrollTop + 50;
-
-        // Mesajlar arasına ekstra boşluk için başına iki tane <br> ekliyoruz
         logs.innerHTML += `<br><br>> <span style="color:${color}">${msg}</span>`;
 
-        if (isAtBottom) {
-          setTimeout(() => {
-            logs.scrollTo({
-              top: logs.scrollHeight,
-              behavior: "smooth",
-            });
-          }, 300); // 300ms gecikme ile daha sakin bir kaydırma
-        }
+        // Otomatik en aşağı indir
+        logs.scrollTop = logs.scrollHeight;
       }
 
       function formatZaman(dakika) {
@@ -310,6 +397,12 @@
           .padStart(2, "0");
         let m = (dakika % 60).toString().padStart(2, "0");
         return `${h}:${m}`;
+      }
+
+      function formatTarih(tarihStr) {
+        // "YYYY-MM-DD" formatını "DD.MM.YYYY" yap
+        const [yil, ay, gun] = tarihStr.split("-");
+        return `${gun}.${ay}.${yil}`;
       }
 
       async function verileriCek() {
@@ -324,22 +417,199 @@
         }
       }
 
+      // --- NODE.JS EKLEME FONKSİYONU ---
+      async function ekleNodeJS() {
+        const idInput = document.getElementById('idInput');
+        const isimInput = document.getElementById('isimInput');
+        const tarihInput = document.getElementById('tarihInput');
+        const basInput = document.getElementById('basInput');
+        const bitInput = document.getElementById('bitInput');
+        
+        // Önce tüm border'ları temizle
+        [idInput, isimInput, tarihInput, basInput, bitInput].forEach(input => {
+            input.style.border = '';
+        });
+        
+        const data = {
+            id: idInput.value.trim(),
+            isim: isimInput.value.trim(),
+            tarih: tarihInput.value,
+            baslangic: basInput.value,
+            bitis: bitInput.value
+        };
+
+        // Boş alan kontrolü
+        let hataVar = false;
+        if(!data.id) {
+            idInput.style.border = "2px solid #ef5350";
+            hataVar = true;
+        }
+        if(!data.isim) {
+            isimInput.style.border = "2px solid #ef5350";
+            hataVar = true;
+        }
+        if(!data.tarih) {
+            tarihInput.style.border = "2px solid #ef5350";
+            hataVar = true;
+        }
+        if(!data.baslangic) {
+            basInput.style.border = "2px solid #ef5350";
+            hataVar = true;
+        }
+        if(!data.bitis) {
+            bitInput.style.border = "2px solid #ef5350";
+            hataVar = true;
+        }
+        
+        if(hataVar) {
+            hataGoster("Tüm alanları doldurun!");
+            logYaz("HATA: Tüm alanları doldurun!", true);
+            return;
+        }
+
+        // Ters zaman kontrolü
+        const basSaati = new Date(`2000-01-01T${data.baslangic}`);
+        const bitSaati = new Date(`2000-01-01T${data.bitis}`);
+        
+        if (basSaati >= bitSaati) {
+            hataGoster("Başlangıç saati bitiş saatinden önce olmalı!");
+            logYaz("HATA: Başlangıç saati bitiş saatinden önce olmalı!", true);
+            basInput.style.border = "2px solid #ef5350";
+            bitInput.style.border = "2px solid #ef5350";
+            return;
+        }
+
+        // Minimum süre kontrolü (15 dakika)
+        const dakikaFark = (bitSaati - basSaati) / (1000 * 60);
+        if (dakikaFark < 15) {
+            hataGoster("Randevu en az 15 dakika olmalı!");
+            logYaz("HATA: Randevu en az 15 dakika olmalı!", true);
+            basInput.style.border = "2px solid #ef5350";
+            bitInput.style.border = "2px solid #ef5350";
+            return;
+        }
+
+        // Gelecek tarih kontrolü
+        const secilenTarih = new Date(data.tarih);
+        const bugun = new Date();
+        bugun.setHours(0, 0, 0, 0);
+        
+        if (secilenTarih < bugun) {
+            hataGoster("Geçmiş tarihe randevu alamazsınız!");
+            logYaz("HATA: Geçmiş tarihe randevu alamazsınız!", true);
+            tarihInput.style.border = "2px solid #ef5350";
+            return;
+        }
+
+        logYaz(`C-Motoruna gönderiliyor: ${data.isim} (${data.tarih})...`);
+        
+        try {
+            const res = await fetch('/ekle', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+            
+            if(result.success) {
+                logYaz("✓ " + (result.message || "Randevu başarıyla eklendi!"));
+                
+                // BAŞARILI - TÜM ALANLARI TEMİZLE
+                formTamTemizle();
+                
+                // Başarı mesajı için geçici yeşil gösterim
+                [idInput, isimInput].forEach(input => {
+                    input.style.border = "2px solid #27ae60";
+                });
+                
+                setTimeout(() => {
+                    [idInput, isimInput].forEach(input => {
+                        input.style.border = "";
+                    });
+                }, 1500);
+                
+                verileriCek(); 
+            } else {
+                // HATA DURUMU
+                const hataMesaji = result.error || "Randevu eklenemedi!";
+                hataGoster(hataMesaji);
+                logYaz("✗ " + hataMesaji, true);
+                
+                // ID hatası ise ID alanını işaretle
+                if (hataMesaji.includes('ID') || hataMesaji.includes('zaten')) {
+                    idInput.style.border = "2px solid #ef5350";
+                    idInput.focus();
+                }
+                
+                // Çakışma hatası ise saat alanlarını işaretle
+                if (hataMesaji.includes('çakışma') || hataMesaji.includes('saat')) {
+                    basInput.style.border = "2px solid #ef5350";
+                    bitInput.style.border = "2px solid #ef5350";
+                    basInput.focus();
+                }
+            }
+        } catch (error) {
+            const hataMesaji = "Sunucuya bağlanılamadı!";
+            hataGoster(hataMesaji);
+            logYaz("✗ " + hataMesaji, true);
+            console.error("Hata:", error);
+        }
+      }
+      async function undoNodeJS() {
+        logYaz("Undo (Geri Al) komutu gonderildi...");
+        const res = await fetch("/undo", { method: "POST" });
+        const result = await res.json();
+        if (result.success) {
+          logYaz("Geri alma islemi tamam.");
+          verileriCek();
+        }
+      }
+
       function arayuzGuncelle() {
         const liste = document.getElementById("randevuListesi");
         liste.innerHTML = "";
+
+        if (randevular.length === 0) {
+          liste.innerHTML =
+            '<p style="font-size: 0.8rem; color: #95a5a6; text-align: center; margin-top: 20px;">Henüz randevu yok.</p>';
+          return;
+        }
+
+        // Tarihe göre grupla
+        const tariheGoreGrupla = {};
         randevular.forEach((r) => {
+          if (!tariheGoreGrupla[r.tarih]) {
+            tariheGoreGrupla[r.tarih] = [];
+          }
+          tariheGoreGrupla[r.tarih].push(r);
+        });
+
+        // Tarihlere göre sırala ve göster
+        const tarihler = Object.keys(tariheGoreGrupla).sort();
+
+        tarihler.forEach((tarih) => {
+          // Tarih başlığı
           liste.innerHTML += `
-                <div class="item-row">
-                    <span><b>#${r.id}</b> ${r.isim}</span>
-                    <span class="badge">${formatZaman(
-                      r.baslangic
-                    )} - ${formatZaman(r.bitis)}</span>
-                </div>`;
+            <div style="background: #f8f9fa; padding: 5px 10px; margin: 10px 0 5px 0; border-left: 3px solid var(--secondary); font-size: 0.75rem; color: var(--primary);">
+              <i class="fas fa-calendar-day"></i> ${formatTarih(tarih)}
+            </div>`;
+
+          // O tarihteki randevular
+          tariheGoreGrupla[tarih].forEach((r) => {
+            liste.innerHTML += `
+                  <div class="item-row">
+                      <span><b>#${r.id}</b> ${r.isim}</span>
+                      <span class="badge">${formatZaman(
+                        r.baslangic
+                      )} - ${formatZaman(r.bitis)}</span>
+                  </div>`;
+          });
         });
       }
 
       function kuyruguGoster() {
-        logYaz("Case 3: Bekleme kuyrugu analiz ediliyor...");
+        logYaz("Bekleme kuyrugu analiz ediliyor...");
         const kList = document.getElementById("kuyrukListesi");
         kList.innerHTML = "";
         if (beklemeKuyrugu.length === 0) {
@@ -348,13 +618,12 @@
           logYaz("Kuyruk bos.");
         } else {
           beklemeKuyrugu.forEach((r, index) => {
-            kList.innerHTML += `
-                    <div class="queue-row">
-                        <span>[${index + 1}] <b>${r.isim}</b> (ID: ${
+            kList.innerHTML += `<div class="queue-row">
+                <span>[${index + 1}] <b>${r.isim}</b> (ID: ${
               r.id
-            })</span>
-                        <span style="color:var(--danger)">BEKLIYOR</span>
-                    </div>`;
+            })<br><small>${formatTarih(r.tarih)}</small></span>
+                <span style="color:var(--danger)">BEKLIYOR</span>
+              </div>`;
           });
           logYaz(`${beklemeKuyrugu.length} randevu kuyrukta listelendi.`);
         }
@@ -365,7 +634,7 @@
           logYaz("HATA: Islenecek bekleyen randevu yok!", true);
           return;
         }
-        logYaz("Case 4: Kuyruk basi eleman cikariliyor (Dequeue)...");
+        logYaz("Kuyruk basi eleman cikariliyor (Dequeue)...");
         let r = beklemeKuyrugu.shift();
         let basarili = Math.random() > 0.3;
         if (basarili) {
@@ -373,10 +642,7 @@
           randevular.push(r);
           arayuzGuncelle();
         } else {
-          logYaz(
-            `HATA: Cakisma devam ediyor, ${r.isim} kuyruga geri atildi.`,
-            true
-          );
+          logYaz(`HATA: Cakisma devam ediyor, ${r.isim} geri atildi.`, true);
           beklemeKuyrugu.push(r);
         }
         kuyruguGoster();
@@ -388,8 +654,8 @@
         logYaz(`Binary Search tetiklendi: ID ${id}`);
         randevular.sort((a, b) => a.id - b.id);
         let low = 0,
-          high = randevular.length - 1;
-        let sonuc = null;
+          high = randevular.length - 1,
+          sonuc = null;
         while (low <= high) {
           let mid = Math.floor((low + high) / 2);
           if (randevular[mid].id == id) {
@@ -400,8 +666,14 @@
           else high = mid - 1;
         }
         if (sonuc) {
-          logYaz(`Bulundu: ${sonuc.isim}`);
-          alert(`ID ${id} BULUNDU!\nKişi: ${sonuc.isim}`);
+          logYaz(`Bulundu: ${sonuc.isim} (${formatTarih(sonuc.tarih)})`);
+          alert(
+            `ID ${id} BULUNDU!\nKişi: ${sonuc.isim}\nTarih: ${formatTarih(
+              sonuc.tarih
+            )}\nSaat: ${formatZaman(sonuc.baslangic)} - ${formatZaman(
+              sonuc.bitis
+            )}`
+          );
         } else logYaz(`ID ${id} bulunamadi.`, true);
       }
 
@@ -416,11 +688,23 @@
         if (randevular.length === 0) return;
         logYaz("BFS Hiyerarsisi olusturuluyor...");
         let output =
-          "ROOT: " + randevular[0].isim + " (ID: " + randevular[0].id + ")\n";
+          "ROOT: " +
+          randevular[0].isim +
+          " (ID: " +
+          randevular[0].id +
+          ", Tarih: " +
+          formatTarih(randevular[0].tarih) +
+          ")\n";
         for (let i = 1; i < randevular.length; i++) {
           let yan = i % 2 === 0 ? "├── SAG: " : "└── SOL: ";
           output +=
-            yan + randevular[i].isim + " (ID: " + randevular[i].id + ")\n";
+            yan +
+            randevular[i].isim +
+            " (ID: " +
+            randevular[i].id +
+            ", Tarih: " +
+            formatTarih(randevular[i].tarih) +
+            ")\n";
         }
         document.getElementById("bfsOutput").innerText = output;
         logYaz("Agac yapisi simüle edildi.");
@@ -434,6 +718,109 @@
         document.getElementById("dijkstraOutput").innerText = res;
         logYaz("Analiz tamamlandi.");
       }
+      function hataGoster(mesaj) {
+        const hataDiv = document.getElementById('hataMesaji');
+        const hataText = document.getElementById('hataText');
+        hataText.textContent = mesaj;
+        hataDiv.style.display = 'block';
+        
+        setTimeout(() => {
+            hataDiv.style.display = 'none';
+        }, 3000);
+      }
+
+      // Form otomatik kontrol
+      function formKontrol() {
+        const basInput = document.getElementById('basInput');
+        const bitInput = document.getElementById('bitInput');
+        
+        if (basInput.value && bitInput.value) {
+            const bas = new Date(`2000-01-01T${basInput.value}`);
+            const bit = new Date(`2000-01-01T${bitInput.value}`);
+            
+            if (bas >= bit) {
+                basInput.style.border = "2px solid #ef5350";
+                bitInput.style.border = "2px solid #ef5350";
+                hataGoster("Başlangıç saati bitişten önce olmalı!");
+            } else {
+                basInput.style.border = "";
+                bitInput.style.border = "";
+            }
+        }
+      }
+
+      // Input event listener'ları ekle
+      document.addEventListener('DOMContentLoaded', function() {
+        const basInput = document.getElementById('basInput');
+        const bitInput = document.getElementById('bitInput');
+        
+        basInput.addEventListener('change', formKontrol);
+        bitInput.addEventListener('change', formKontrol);
+        
+        // Bugünün tarihini minimum yap
+        const bugun = new Date().toISOString().split('T')[0];
+        document.getElementById('tarihInput').min = bugun;
+      });
+
+      // Form temizleme fonksiyonu (TÜM ALANLARI TEMİZLE)
+      function formTemizle() {
+        // Tüm input alanlarını temizle
+        document.getElementById('idInput').value = '';
+        document.getElementById('isimInput').value = '';
+        document.getElementById('tarihInput').value = '';
+        document.getElementById('basInput').value = '';
+        document.getElementById('bitInput').value = '';
+        document.getElementById('searchId').value = '';
+        
+        // Hata mesajını temizle
+        document.getElementById('hataMesaji').style.display = 'none';
+        
+        // Border'ları temizle
+        document.querySelectorAll('input').forEach(input => {
+            input.style.border = '';
+        });
+        
+        logYaz("✓ Form temizlendi. Yeni randevu için hazır.");
+      }
+
+      // Başarılı kayıttan sonra formu tamamen temizle
+      function formTamTemizle() {
+        document.getElementById('idInput').value = '';
+        document.getElementById('isimInput').value = '';
+        document.getElementById('tarihInput').value = '';
+        document.getElementById('basInput').value = '';
+        document.getElementById('bitInput').value = '';
+        
+        // Border'ları temizle
+        const inputs = ['idInput', 'isimInput', 'tarihInput', 'basInput', 'bitInput'];
+        inputs.forEach(id => {
+            document.getElementById(id).style.border = '';
+        });
+        
+        // Varsayılan değerleri ayarla
+        setTimeout(() => {
+            const bugun = new Date();
+            const tarihStr = bugun.toISOString().split('T')[0];
+            document.getElementById('tarihInput').value = tarihStr;
+            
+            const simdi = new Date();
+            const baslangic = new Date(simdi.getTime() + 60 * 60 * 1000);
+            const bitis = new Date(baslangic.getTime() + 60 * 60 * 1000);
+            
+            document.getElementById('basInput').value = 
+                baslangic.getHours().toString().padStart(2, '0') + ':' + 
+                baslangic.getMinutes().toString().padStart(2, '0');
+            
+            document.getElementById('bitInput').value = 
+                bitis.getHours().toString().padStart(2, '0') + ':' + 
+                bitis.getMinutes().toString().padStart(2, '0');
+        }, 100);
+      }
+      // Sayfa yüklendiğinde
+      window.onload = function() {
+        verileriCek();
+        formTemizle();
+      };
 
       window.onload = verileriCek;
     </script>

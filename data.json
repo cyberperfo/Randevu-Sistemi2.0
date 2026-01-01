@@ -1,9 +1,7 @@
 [
-  {"id": 4, "isim": "yusug", "baslangic": 60, "bitis": 150},
-  {"id": 1, "isim": "sametxd", "baslangic": 570, "bitis": 620},
-  {"id": 2, "isim": "samet", "baslangic": 750, "bitis": 940},
-  {"id": 100, "isim": "yusuf", "baslangic": 940, "bitis": 1010},
-  {"id": 4, "isim": "Pembe Furkan toparlak", "baslangic": 1140, "bitis": 1200},
-  {"id": 12, "isim": "Muhammedcan Tengur", "baslangic": 1210, "bitis": 1250},
-  {"id": 13, "isim": "Dehşet Zurna", "baslangic": 1270, "bitis": 1335}
+  {"id": 374, "isim": "Samet KARATAŞ", "tarih": "2026-01-02", "baslangic": 600, "bitis": 660},
+  {"id": 31, "isim": "Zihniyet-i Seksüalite", "tarih": "2026-01-01", "baslangic": 900, "bitis": 960},
+  {"id": 80, "isim": "Osmaniye", "tarih": "2026-01-01", "baslangic": 960, "bitis": 1020},
+  {"id": 32, "isim": "ismail", "tarih": "2026-01-04", "baslangic": 980, "bitis": 1040},
+  {"id": 35, "isim": "yusuf", "tarih": "2026-01-03", "baslangic": 980, "bitis": 1040}
 ]
