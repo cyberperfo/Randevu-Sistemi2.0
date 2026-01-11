@@ -11,7 +11,7 @@ typedef struct
 {
     int id;
     char isim[50];
-    char tarih[11]; // "YYYY-MM-DD" formatında
+    char tarih[11];
     int baslangic;
     int bitis;
 } Randevu;
@@ -546,7 +546,7 @@ int main()
 
     do
     {
-        printf("\n=== IMU SALON YONETIM MOTORU v5.0 ===\n");
+        printf("\n=== Randevu Sistemi ===\n");
         printf("1. Yeni Randevu Ekle\n2. Geri Al (Undo)\n3. Bekleme Listesi\n4. Bekleyeni Isle\n5. Agac Yapisi (BFS)\n6. Mesafe Analizi (Dijkstra)\n7. ID Sirala (Quicksort)\n8. ID Ara (Binary Search)\n9. JSON Guncelle\n10. Cikis\nSecim: ");
         if (scanf("%d", &secim) != 1)
         {
